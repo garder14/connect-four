@@ -1,4 +1,4 @@
-let isTouch =  !!("ontouchstart" in window) || window.navigator.msMaxTouchPoints > 0;
+const isTouch =  !!("ontouchstart" in window) || window.navigator.msMaxTouchPoints > 0;
 
 const rows = 6, cols = 7;
 const colorUser = '#3498DB', colorAI = '#FAD02E';
