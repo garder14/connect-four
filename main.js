@@ -1,7 +1,7 @@
 const isTouch =  !!("ontouchstart" in window) || window.navigator.msMaxTouchPoints > 0;
 
 const rows = 6, cols = 7;
-const colorUser = '#3498DB', colorAI = '#FAD02E';
+const colorUser = '#3498DB', colorAI = '#FAD02E', colorBackground = '#EAF0F1';
 const maximumDepth = 6;
 
 
@@ -80,13 +80,16 @@ function dropToken(e) {
     lowestRow = getLowestRow(colId, board);
     if (lowestRow != -1) {
         // Falling animation        
-        setTimeout(function(){
-            document.querySelector(`[data-row="0"][data-col="${colId}"]`).style.background = colorUser;}, 50);
+        setTimeout(function() {
+            document.querySelector(`[data-row="0"][data-col="${colId}"]`).style.background = colorUser;
+        }, 50);
         for (let i = 1; i <= lowestRow; i++) {
-            setTimeout(function(){
-                document.querySelector(`[data-row="${i - 1}"][data-col="${colId}"]`).style.background = "#EAF0F1";}, 50 + 50 * i);
-            setTimeout(function(){
-                document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = colorUser;}, 50 + 50 * i);
+            setTimeout(function() {
+                document.querySelector(`[data-row="${i - 1}"][data-col="${colId}"]`).style.background = colorBackground;
+            }, 50 + 50 * i);
+            setTimeout(function() {
+                document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = colorUser;
+            }, 50 + 50 * i);
         }
 
         board[lowestRow][colId] = 1;
@@ -104,12 +107,15 @@ function moveAI() {
         const bestRow = result.bestRow, bestColumn = result.bestCol;
 
         setTimeout(function(){
-            document.querySelector(`[data-row="0"][data-col="${bestColumn}"]`).style.background = colorAI;}, 50);
+            document.querySelector(`[data-row="0"][data-col="${bestColumn}"]`).style.background = colorAI;
+        }, 50);
         for (let i = 1; i <= bestRow; i++) {
             setTimeout(function(){
-                document.querySelector(`[data-row="${i - 1}"][data-col="${bestColumn}"]`).style.background = "#EAF0F1";}, 50 + 50*i);
+                document.querySelector(`[data-row="${i - 1}"][data-col="${bestColumn}"]`).style.background = colorBackground;
+            }, 50 + 50*i);
             setTimeout(function(){
-                document.querySelector(`[data-row="${i}"][data-col="${bestColumn}"]`).style.background = colorAI;}, 50 + 50*i);
+                document.querySelector(`[data-row="${i}"][data-col="${bestColumn}"]`).style.background = colorAI;
+            }, 50 + 50*i);
         }        
 
         board[bestRow][bestColumn] = 2;
