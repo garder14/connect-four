@@ -76,38 +76,34 @@ function getLowestAvailableRow(colId, currentBoard) {
 }
 
 
-// Drop disc into colId if the move is valid, and return the rowId where it falls. 
-// Return -1 if the move is invalid.
-function dropDisc(colId, playerId) {
-    // playerId = 1 (human) or 2 (AI)
+// Drop playerId's disc into column colId (and row rowId) with an animation.
+function dropDisc(colId, rowId, playerId) {
     let time1 = 0, time2 = 50;
-    rowId = getLowestAvailableRow(colId, board);
-    if (rowId != -1) {  // valid move
-        // Animate the fall of the disc
-        for (let i = 0; i <= rowId; i++) {
+    for (let i = 0; i <= rowId; i++) {
+        setTimeout(() => {
+            document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[playerId];
+        }, time1);  // Color slot
+        if (i < rowId) {
             setTimeout(() => {
-                document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[playerId];
-            }, time1);  // Color slot
-            if (i < rowId) {
-                setTimeout(() => {
-                    document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[0];
-                }, time2);  // Uncolor slot
-            }
-            time1 += 50
-            time2 += 50
+                document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[0];
+            }, time2);  // Uncolor slot
         }
-        board[rowId][colId] = playerId;
+        time1 += 50
+        time2 += 50
     }
-    return rowId
+    board[rowId][colId] = playerId;
 }
 
 
 function turnHuman(e) {
     const colId = this.dataset.col;
-    rowId = dropDisc(colId, 1);
+    rowId = getLowestAvailableRow(colId, board);
+
     if (rowId != -1) {  // valid move
         freezeBoard();
         animationTime = 50 * (rowId + 1) + 20
+        dropDisc(colId, rowId, 1);
+
         setTimeout(() => {
             let eog = isEndOfGame(board);
             if (eog == 0) document.querySelector('.winner').innerHTML = "IT'S A DRAW.";
@@ -120,8 +116,11 @@ function turnHuman(e) {
 
 function turnAI() {
     const bestColId = minimax(board, 'AI', MAXDEPTH, -Infinity, Infinity).bestColId;
-    rowId = dropDisc(bestColId, 2);
+    rowId = getLowestAvailableRow(bestColId, board);  // the AI move is always valid
+
     animationTime = 50 * (rowId + 1) + 20
+    dropDisc(bestColId, rowId, 2);
+
     setTimeout(() => {
         eog = isEndOfGame(board);
         if (eog == 0) document.querySelector('.winner').innerHTML = "IT'S A DRAW.";
