@@ -41,12 +41,12 @@ function showElements(elements) {
 }
 
 function freezeBoard() {
-    columns.forEach(c => c.removeEventListener('click', moveHuman));
+    columns.forEach(c => c.removeEventListener('click', turnHuman));
     columns.forEach(c => c.classList.add('unhoverable'));
 }
 
 function unfreezeBoard() {
-    columns.forEach(c => c.addEventListener('click', moveHuman));
+    columns.forEach(c => c.addEventListener('click', turnHuman));
     if (!isTouch) {  // activate column hovering (not on mobile)
         columns.forEach(c => c.classList.remove('unhoverable'));
     }
@@ -63,7 +63,7 @@ buttonFirst.addEventListener('click', function(e) {
 buttonSecond.addEventListener('click', function(e) {
     hideElements([this, buttonFirst, textQuestion]);
     showElements([elementBoard, buttonRestart, textWinner])
-    setTimeout(moveAI, 20);  // ensure that the DOM has updated before running moveAI
+    setTimeout(turnAI, 20);  // ensure that the DOM has updated before running turnAI
 });
 
 
@@ -76,17 +76,19 @@ function getLowestAvailableRow(colId, currentBoard) {
 }
 
 
+// Drop disc into colId if the move is valid, and return the rowId where it falls. 
+// Return -1 if the move is invalid.
 function dropDisc(colId, playerId) {
     // playerId = 1 (human) or 2 (AI)
     let time1 = 0, time2 = 50;
-    lowestRow = getLowestAvailableRow(colId, board);
-    if (lowestRow != -1) {  // valid move
+    rowId = getLowestAvailableRow(colId, board);
+    if (rowId != -1) {  // valid move
         // Animate the fall of the disc
-        for (let i = 0; i <= lowestRow; i++) {
+        for (let i = 0; i <= rowId; i++) {
             setTimeout(() => {
                 document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[playerId];
             }, time1);  // Color slot
-            if (i < lowestRow) {
+            if (i < rowId) {
                 setTimeout(() => {
                     document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[0];
                 }, time2);  // Uncolor slot
@@ -94,33 +96,37 @@ function dropDisc(colId, playerId) {
             time1 += 50
             time2 += 50
         }
-        board[lowestRow][colId] = playerId;
+        board[rowId][colId] = playerId;
     }
-    return (time1 + 20)  // time required for the dropDisc animation to finish
+    return rowId
 }
 
 
-function moveHuman(e) {
+function turnHuman(e) {
     const colId = this.dataset.col;
-    freezeBoard();
-    animationTime = dropDisc(colId, 1);
-    setTimeout(() => {
-        let eog = isEndOfGame(board);
-        if (eog == 0) document.querySelector('.winner').innerHTML = "IT'S A DRAW.";
-        else if (eog == 1) document.querySelector('.winner').innerHTML = "YOU WIN!";
-        else moveAI();  // continue playing
-    }, animationTime);  // allow the dropDisc animation to finish
+    rowId = dropDisc(colId, 1);
+    if (rowId != -1) {  // valid move
+        freezeBoard();
+        animationTime = 50 * (rowId + 1) + 20
+        setTimeout(() => {
+            let eog = isEndOfGame(board);
+            if (eog == 0) document.querySelector('.winner').innerHTML = "IT'S A DRAW.";
+            else if (eog == 1) document.querySelector('.winner').innerHTML = "YOU WIN!";
+            else turnAI();  // continue playing
+        }, animationTime);  // allow the dropDisc animation to finish
+    }
 }
 
 
-function moveAI() {
+function turnAI() {
     const bestColId = minimax(board, 'AI', MAXDEPTH, -Infinity, Infinity).bestColId;
-    animationTime = dropDisc(bestColId, 2);
+    rowId = dropDisc(bestColId, 2);
+    animationTime = 50 * (rowId + 1) + 20
     setTimeout(() => {
         eog = isEndOfGame(board);
         if (eog == 0) document.querySelector('.winner').innerHTML = "IT'S A DRAW.";
         else if (eog == 2) document.querySelector('.winner').innerHTML = "YOU LOSE...";
-        else unfreezeBoard();  // continue playing (allow human player to click a column and trigger moveHuman)
+        else unfreezeBoard();  // continue playing (allow human player to click any column and trigger turnHuman)
     }, animationTime);  // allow the dropDisc animation to finish
 }
 
