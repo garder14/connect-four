@@ -4,6 +4,6 @@ Browser game that allows users to play Connect Four against an AI. Implemented i
 
 Deployed on [Netlify](https://connect4-gerard.netlify.app/).
 
-A screenshot:
+A demo:
 
 ![](assets/demo.gif)
