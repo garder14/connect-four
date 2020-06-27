@@ -78,46 +78,50 @@ function getLowestAvailableRow(colId, currentBoard) {
 
 function dropDisc(colId, playerId) {
     // playerId = 1 (human) or 2 (AI)
+    let time1 = 0, time2 = 50;
     lowestRow = getLowestAvailableRow(colId, board);
     if (lowestRow != -1) {  // valid move
         // Animate the fall of the disc
         for (let i = 0; i <= lowestRow; i++) {
             setTimeout(() => {
                 document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[playerId];
-            }, 50 * i);  // Color slot
+            }, time1);  // Color slot
             if (i < lowestRow) {
                 setTimeout(() => {
                     document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[0];
-                }, 50 * (i + 1));  // Uncolor slot
+                }, time2);  // Uncolor slot
             }
+            time1 += 50
+            time2 += 50
         }
         board[lowestRow][colId] = playerId;
     }
+    return (time1 + 20)  // time required for the dropDisc animation to finish
 }
 
 
 function moveHuman(e) {
     const colId = this.dataset.col;
     freezeBoard();
-    dropDisc(colId, 1);
+    animationTime = dropDisc(colId, 1);
     setTimeout(() => {
         let eog = isEndOfGame(board);
         if (eog == 0) document.querySelector('.winner').innerHTML = "IT'S A DRAW.";
         else if (eog == 1) document.querySelector('.winner').innerHTML = "YOU WIN!";
         else moveAI();  // continue playing
-    }, 310);  // allow the dropDisc animation to finish
+    }, animationTime);  // allow the dropDisc animation to finish
 }
 
 
 function moveAI() {
     const bestColId = minimax(board, 'AI', MAXDEPTH, -Infinity, Infinity).bestColId;
-    dropDisc(bestColId, 2);
+    animationTime = dropDisc(bestColId, 2);
     setTimeout(() => {
         eog = isEndOfGame(board);
         if (eog == 0) document.querySelector('.winner').innerHTML = "IT'S A DRAW.";
         else if (eog == 2) document.querySelector('.winner').innerHTML = "YOU LOSE...";
         else unfreezeBoard();  // continue playing (allow human player to click a column and trigger moveHuman)
-    }, 310);  // allow the dropDisc animation to finish
+    }, animationTime);  // allow the dropDisc animation to finish
 }
 
 
