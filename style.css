@@ -30,11 +30,11 @@
     background: #4e5759;
 }
 
-.nohover:hover {
+.unhoverable:hover {
     background: #616C6F;
 }
 
-.cell {
+.slot {
     background: #EAF0F1;
     height: 5vw;
     width: 5vw;
