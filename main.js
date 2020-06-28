@@ -2,7 +2,7 @@ const isTouch =  !!("ontouchstart" in window) || window.navigator.msMaxTouchPoin
 
 const ROWS = 6, COLS = 7;
 const COLORS = ['#EAF0F1', '#3498DB', '#FAD02E']  // colors for background, human discs, AI discs
-const MAXDEPTH = 5;
+const MAXDEPTH = 6;
 
 
 // Show and define board. Each slot can be 0 (empty), 1 (user) or 2 (AI).
@@ -19,6 +19,8 @@ function showBoard() {
 }
 
 let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+moveCount = 0;
+
 showBoard();
 
 
@@ -92,6 +94,7 @@ function dropDisc(colId, rowId, playerId) {
         time2 += 50
     }
     board[rowId][colId] = playerId;
+    moveCount++;
 }
 
 
@@ -115,7 +118,9 @@ function turnHuman(e) {
 
 
 function turnAI() {
-    const bestColId = minimax(board, 'AI', MAXDEPTH, -Infinity, Infinity).bestColId;
+    let bestColId;
+    if (moveCount == 0) bestColId = Math.floor(COLS / 2);  // AI always starts dropping the disc into the middle
+    else bestColId = minimax(board, 'AI', MAXDEPTH, -Infinity, Infinity).bestColId;
     rowId = getLowestAvailableRow(bestColId, board);  // the AI move is always valid
 
     animationTime = 50 * (rowId + 1) + 20
