@@ -2,14 +2,11 @@ const isTouch =  !!("ontouchstart" in window) || window.navigator.msMaxTouchPoin
 
 const ROWS = 6, COLS = 7;
 const COLORS = ['#EAF0F1', '#3498DB', '#FAD02E']  // colors for background, human discs, AI discs
-const MAXDEPTH = 6;
+const MAXDEPTH = 5;
 
 
-// Build board. Each slot can be 0 (empty), 1 (user) or 2 (AI).
-let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
-buildBoard();
-
-function buildBoard() {
+// Show and define board. Each slot can be 0 (empty), 1 (user) or 2 (AI).
+function showBoard() {
     board_src = ''
     for (let j = 0; j < COLS; j++) {
         board_src += `<div class="column unhoverable" data-col="${j}">`
@@ -20,6 +17,9 @@ function buildBoard() {
     }
     document.querySelector('.board').innerHTML = board_src;
 }
+
+let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+showBoard();
 
 
 const textQuestion = document.querySelector('.question');
@@ -188,18 +188,22 @@ function isEndOfGame(currentBoard) {
 
 
 function minimax(currentBoard, currentPlayer, depth, alpha, beta) {
+    // Check if end of game
+    switch (isEndOfGame(currentBoard)) {
+        case 0:  // draw
+            return {value: 0};
+        case 1:  // human wins
+            return {value: -(1000000 + depth)};
+        case 2:  // AI wins
+            return {value: (1000000 + depth)};  // larger depth -> less moves to win
+        default:
+            // continue
+    }
+    
+    // Check if not end of game but maximum depth reached
     if (depth == 0) return evaluateIntermediateBoard(currentBoard);
 
-    const eog = isEndOfGame(currentBoard);
-    if (eog != -1) {
-        let value;
-        if (eog == 0) value = 0;
-        else if (eog == 1) value = -10000000 * (depth + 1);
-        else if (eog == 2) value = 10000000 * (depth + 1);
-        return {value: value};
-    }
-
-    // neither end of game nor maximum depth reached
+    // Neither end of game nor maximum depth reached
     if (currentPlayer == 'AI') {  // 'max' player (AI)
         let value = -Infinity, bestColId;
         for (let colId = 0; colId < COLS; colId++) {
