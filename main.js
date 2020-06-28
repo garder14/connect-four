@@ -5,32 +5,34 @@ const COLORS = ['#EAF0F1', '#3498DB', '#FAD02E']  // colors for background, huma
 const MAXDEPTH = 6;
 
 
-// Show and define board. Each slot can be 0 (empty), 1 (user) or 2 (AI).
-function showBoard() {
-    board_src = ''
+// Create the HTML code for the initial gameboard.
+function initialBoardHTML() {
+    let board_src = '';
     for (let j = 0; j < COLS; j++) {
-        board_src += `<div class="column unhoverable" data-col="${j}">`
+        board_src += `<div class="column unhoverable" data-col="${j}">`;
         for (let i = 0; i < ROWS; i++) {
-            board_src += `<div class="slot" data-row="${i}" data-col="${j}"></div>`
+            board_src += `<div class="slot" data-row="${i}" data-col="${j}"></div>`;
         }
-        board_src += '</div>'
+        board_src += '</div>';
     }
-    document.querySelector('.board').innerHTML = board_src;
+    return board_src;
 }
 
-let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
-moveCount = 0;
 
-showBoard();
+const elementBoard = document.querySelector('.board');
+elementBoard.innerHTML = initialBoardHTML();
 
-
+const columns = document.querySelectorAll('.column');
 const textQuestion = document.querySelector('.question');
 const textWinner = document.querySelector('.winner');
 const buttonFirst = document.querySelector('.first');
 const buttonSecond = document.querySelector('.second');
 const buttonRestart = document.querySelector('.restart');
-const elementBoard = document.querySelector('.board');
-const columns = document.querySelectorAll('.column');
+
+
+// Store the state of the gameboard. Each slot can be 0 (empty), 1 (user) or 2 (AI).
+let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+moveCount = 0;  // number of completed turns
 
 
 // Functions to manage the DOM
@@ -82,13 +84,14 @@ function getLowestAvailableRow(colId, currentBoard) {
 function dropDisc(colId, rowId, playerId) {
     let time1 = 0, time2 = 50;
     for (let i = 0; i <= rowId; i++) {
+        let animatedSlot = document.querySelector(`[data-row="${i}"][data-col="${colId}"]`);
         setTimeout(() => {
-            document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[playerId];
-        }, time1);  // Color slot
+            animatedSlot.style.backgroundColor = COLORS[playerId];  // Color slot
+        }, time1);
         if (i < rowId) {
             setTimeout(() => {
-                document.querySelector(`[data-row="${i}"][data-col="${colId}"]`).style.background = COLORS[0];
-            }, time2);  // Uncolor slot
+                animatedSlot.style.backgroundColor = COLORS[0];  // Uncolor slot
+            }, time2);
         }
         time1 += 50
         time2 += 50
@@ -109,8 +112,8 @@ function turnHuman(e) {
 
         setTimeout(() => {
             let eog = isEndOfGame(board);
-            if (eog == 0) document.querySelector('.winner').innerHTML = "IT'S A DRAW.";
-            else if (eog == 1) document.querySelector('.winner').innerHTML = "YOU WIN!";
+            if (eog == 0) textWinner.innerHTML = "IT'S A DRAW.";
+            else if (eog == 1) textWinner.innerHTML = "YOU WIN!";
             else turnAI();  // continue playing
         }, animationTime);  // allow the dropDisc animation to finish
     }
@@ -128,8 +131,8 @@ function turnAI() {
 
     setTimeout(() => {
         eog = isEndOfGame(board);
-        if (eog == 0) document.querySelector('.winner').innerHTML = "IT'S A DRAW.";
-        else if (eog == 2) document.querySelector('.winner').innerHTML = "YOU LOSE...";
+        if (eog == 0) textWinner.innerHTML = "IT'S A DRAW.";
+        else if (eog == 2) textWinner.innerHTML = "YOU LOSE...";
         else unfreezeBoard();  // continue playing (allow human player to click any column and trigger turnHuman)
     }, animationTime);  // allow the dropDisc animation to finish
 }
